@@ -3,7 +3,7 @@ const cors = require('cors');
 const app = express();
 const http = require('http');
 require('dotenv').config();
-const stripe = require('stripe')(process.env.STRIPE_SECRET);
+const stripe = require('stripe')("Your_secret_stripe_key");
 require('./connection')
 const server = http.createServer(app);
 const {Server} = require('socket.io');
