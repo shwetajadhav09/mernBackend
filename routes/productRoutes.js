@@ -1,6 +1,11 @@
+
+
 const router = require('express').Router();
 const Product = require('../models/Product');
 const User = require('../models/User');
+
+const asyncHandler = require('express-async-handler');
+
 
 //get products;
 router.get('/', async(req, res)=> {
@@ -162,6 +167,45 @@ router.post('/remove-from-cart', async(req, res)=> {
 })
 
 
+
+// Define the createProductReview function
+router.post('/:productId/reviews', async (req, res) => {
+  try {
+    const productId = req.params.productId;
+
+    // Find the product by ID
+    const product = await Product.findById(productId);
+
+    if (!product) {
+      return res.status(404).json({ message: 'Product not found' });
+    }
+
+    // Create a new review
+    const newReview = {
+      name: req.body.name,
+      rating: req.body.rating,
+      comment: req.body.comment,
+      user: req.body.userId, // Assuming you have the user ID in the request body
+    };
+
+    // Add the review to the product's reviews array
+    product.reviews.push(newReview);
+
+    // Update the product's rating and numReviews based on the new review
+    product.rating =
+      (product.rating * product.numReviews + newReview.rating) /
+      (product.numReviews + 1);
+    product.numReviews += 1;
+
+    // Save the updated product
+    await product.save();
+
+    res.status(201).json({ message: 'Review added successfully', review: newReview });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: 'Internal Server Error' });
+  }
+});
 
 
 module.exports = router;
